@@ -9,8 +9,13 @@ According to the `X-VPJAX` header that comes with the request in the server outp
 ```js
 
 // When instantiating the class we send a flag to the constructor method pointing to the trigger and the container.
-const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap')
+const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').init()
 
+// And with form submit support.
+const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').form('[data-vpjax]').init()
+
+// You can also use it as below to reload the page.
+vanillaPjax.reload();
 ```
 For events;
 ```js
@@ -24,31 +29,46 @@ document.addEventListener("vPjax:finish", (e) => {
 
 // Other events
 document.addEventListener("vPjax:click", (e) => {
-  // some actions
+  // Actions to be taken when a click is received for the new page.
+})
+
+document.addEventListener("vPjax:submit", (e) => {
+  // Actions to take when form submission is triggered.
 })
 
 document.addEventListener("vPjax:beforeSend", (e) => {
-  // some actions
+  // Actions to be taken just before the asynchronous request starts.
 })
 
 document.addEventListener("vPjax:timeout", (e) => {
-  // some actions
+  // Actions to take when timeout occurs.
 })
 
 document.addEventListener("vPjax:success", (e) => {
-  // some actions
+  // Actions to be taken when the server response is successfully received.
 })
 
 document.addEventListener("vPjax:beforeExtract", (e) => {
-  // some actions
+  // Actions to be taken before DOM update starts.
 })
 
 document.addEventListener("vPjax:error", (e) => {
-  // some actions
+  // Actions to take when an error occurs.
 })
 
 document.addEventListener("vPjax:popstate", (e) => {
-  // some actions
+  // Actions to be taken when going backwards or forwards.
 })
+```
+
+You can perform server-side request control on the server as in the example below.
+```php
+  
+  if (isset($_SERVER['HTTP_X_VPJAX']) !== false) {
+    // For new page loads with vPJAX.
+  } else {
+    // The part you will use for the first load.
+  }
+  
 ```
 Inspired by: jquery-pjax [https://github.com/defunkt/jquery-pjax]
