@@ -1,6 +1,6 @@
 {
   "name": "vpjax",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "You can save your visitors from reloading resources every time they switch pages. In addition, since the whole process is asynchronous, it will provide a great experience by providing a faster transition.",
   "main": "vpjax.js",
   "scripts": {

@@ -7,266 +7,274 @@
 
 class vPjax {
 
-	// Define basic parameters and initialize class
-	constructor (selector, wrap) {
+  // Define basic parameters and initialize class
+  constructor (selector, wrap) {
 
-		this.version = '0.2.0'
-		this.options = {
-			selector,
-			wrap,
-			formSelector: null,
-			url: null,
-			cacheExpire: 300,
-			timeOut: 1000,
-		}
-		this.fetch = null
-		this.method = 'GET'
-		this.formData = null
+    this.version = '0.5.1'
+    this.options = {
+      selector,
+      wrap,
+      formSelector: null,
+      url: null,
+      cacheExpire: 300,
+      timeOut: 1000,
+    }
+    this.fetch = null
+    this.method = 'GET'
+    this.formData = null
 
-		window.onpopstate = (e) => this.getBack(e)
-		return this
-	}
+    window.onpopstate = (e) => this.getBack(e)
+    return this
+  }
 
-	// Add event listener for targets.
-	init () {
-		let links = document.querySelectorAll(this.options.selector)
-		for (let i = 0; i < links.length; i++) {
-			links[i].addEventListener("click", (e) => {
-				this.handler(e, links[i])
-			})
-		}
+  // Add event listener for targets.
+  init () {
+    let links = document.querySelectorAll(this.options.selector)
+    for (let i = 0; i < links.length; i++) {
+      links[i].addEventListener("click", (e) => {
+        this.handler(e, links[i])
+      })
+    }
 
-		if (this.options.formSelector) {
-			let forms = document.querySelectorAll(this.options.formSelector)
-			for (let i = 0; i < forms.length; i++) {
-				forms[i].addEventListener("submit", (e) => {
-					this.formHandler(e, forms[i])
-				})
-			}
-		}
+    if (this.options.formSelector) {
+      let forms = document.querySelectorAll(this.options.formSelector)
+      for (let i = 0; i < forms.length; i++) {
+        forms[i].addEventListener("submit", (e) => {
+          this.formHandler(e, forms[i])
+        })
+      }
+    }
 
-		return this
-	}
+    return this
+  }
 
-	// Handle the click event.
-	handler (event, element) {
+  // Handle the click event.
+  handler (event, element) {
 
-		// Ignore for hash-only addresses.
-		if ( element.getAttribute('href') === '#') 
-			return
+    // Ignore for hash-only addresses.
+    if ( element.getAttribute('href') === '#') 
+      return
 
-		const link = new URL(element.getAttribute('href'))
+    const link = new URL(element.getAttribute('href'))
 
-		// Middle click, command click, and control click should open links in a new tab as normal.
-		if ( event.ctrlKey || event.shiftKey || event.altKey || event.metaKey || event.which > 1 ) 
-			return
+    // Middle click, command click, and control click should open links in a new tab as normal.
+    if ( event.ctrlKey || event.shiftKey || event.altKey || event.metaKey || event.which > 1 ) 
+      return
 
-		// Ignore cross origin links
-		if ( location.protocol !== link.protocol || location.hostname !== link.hostname ) {
-			location.href = link 
-			return
-		}
+    // Ignore cross origin links
+    if ( location.protocol !== link.protocol || location.hostname !== link.hostname ) {
+      location.href = link 
+      return
+    }
 
-		// Ignore case when a hash is being tracked on the current URL
-		if ( link.href.indexOf('#') > -1 && this.stripHash(link) === this.stripHash(location) ) 
-			return
+    // Ignore case when a hash is being tracked on the current URL
+    if ( link.href.indexOf('#') > -1 && this.stripHash(link) === this.stripHash(location) ) 
+      return
 
-		// The click event is generated.
-		const clickEvent = new CustomEvent('vPjax:click', {detail: {options: this.options}});
-		document.dispatchEvent(clickEvent);
+    // The click event is generated.
+    const clickEvent = new CustomEvent('vPjax:click', {detail: {options: this.options}});
+    document.dispatchEvent(clickEvent);
 
-		// Preparing header contents
-		this.formData = null
-		this.method = 'GET'
+    // Preparing header contents
+    this.formData = null
+    this.method = 'GET'
 
-		// Get
-		this.get(link)
-		event.preventDefault()
-		return this
-	}
+    // Get
+    this.get(link)
+    event.preventDefault()
+    return this
+  }
 
-	// Handle the click event.
-	formHandler (event, element) {
+  // Reload to direct link or current page
+  reload(url = null) {
+    this.method = "GET"
+    this.formData = null
+    if (url === null) url = location.href
+    this.get(url);
+  }
 
-		// Ignore for hash-only addresses.
-		if ( element.getAttribute('action') === '#') 
-			return
+  // Handle the click event.
+  formHandler (event, element) {
 
-		// Preparing link
-		let link = element.getAttribute('action')
-		if (link.indexOf(location.origin) === -1) {
-			link = location.origin + (link.substring(0,1) === '/' ? '' : '/') + link
-		}
+    // Ignore for hash-only addresses.
+    if ( element.getAttribute('action') === '#') 
+      return
 
-		// Preparing header contents
-		this.formData = new FormData(element)
-		let method = element.getAttribute('method').toUpperCase()
-		if (method === 'GET') {
-			return
-		}
-		this.method = 'POST'
+    // Preparing link
+    let link = element.getAttribute('action')
+    if (link.indexOf(location.origin) === -1) {
+      link = location.origin + (link.substring(0,1) === '/' ? '' : '/') + link
+    }
 
-		// Creating event
-		const submitEvent = new CustomEvent('vPjax:submit', {detail: {options: this.options}});
-		document.dispatchEvent(submitEvent);
+    // Preparing header contents
+    this.formData = new FormData(element)
+    let method = element.getAttribute('method').toUpperCase()
+    if (method === 'GET') {
+      return
+    }
+    this.method = 'POST'
 
-		this.get(link)
-		event.preventDefault()
-		return this
-	}
+    // Creating event
+    const submitEvent = new CustomEvent('vPjax:submit', {detail: {options: this.options}});
+    document.dispatchEvent(submitEvent);
 
-	async get (url) {
+    this.get(link)
+    event.preventDefault()
+    return this
+  }
 
-		// Creating beforeSend event.
-		const beforeSendEvent = new CustomEvent('vPjax:beforeSend', {detail: {options: this.options, url: url}});
-		document.dispatchEvent(beforeSendEvent);
+  async get (url) {
 
-		const controller = new AbortController()
-		this.options.url = url
+    // Creating beforeSend event.
+    const beforeSendEvent = new CustomEvent('vPjax:beforeSend', {detail: {options: this.options, url: url}});
+    document.dispatchEvent(beforeSendEvent);
 
-		let timer
-		if (this.options.timeOut) {
-			timer = setTimeout(() => {
-				if (! this.fetch) {
+    const controller = new AbortController()
+    this.options.url = url
 
-					// Creating timeout event.
-					const timeoutEvent = new CustomEvent('vPjax:timeout', {detail: {options: this.options, fetch: controller}});
-					document.dispatchEvent(timeoutEvent);
+    let timer
+    if (this.options.timeOut) {
+      timer = setTimeout(() => {
+        if (! this.fetch) {
 
-					controller.abort()
-					location.href = this.options.url
-					clearTimeout(timer);
-				}
-			}, this.options.timeOut);
-		}
+          // Creating timeout event.
+          const timeoutEvent = new CustomEvent('vPjax:timeout', {detail: {options: this.options, fetch: controller}});
+          document.dispatchEvent(timeoutEvent);
 
-		// Creating start event.
-		const startEvent = new CustomEvent('vPjax:start', {detail: {options: this.options, abort: controller}});
-		document.dispatchEvent(startEvent);
+          controller.abort()
+          location.href = this.options.url
+          clearTimeout(timer);
+        }
+      }, this.options.timeOut);
+    }
 
-		let fetchOptions = {
-			method: this.method,
-			mode: 'cors',
-			cache: 'no-cache',
-			credentials: 'same-origin',
-			headers: {
-			  'X-VPJAX': true
-			},
-			redirect: 'follow',
-			referrerPolicy: 'same-origin',
-			signal: controller.signal
-		}
+    // Creating start event.
+    const startEvent = new CustomEvent('vPjax:start', {detail: {options: this.options, abort: controller}});
+    document.dispatchEvent(startEvent);
 
-		if (this.formData) {
-			fetchOptions['body'] = this.formData
-		}
+    let fetchOptions = {
+      method: this.method,
+      mode: 'cors',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      headers: {
+        'X-VPJAX': true
+      },
+      redirect: 'follow',
+      referrerPolicy: 'same-origin',
+      signal: controller.signal
+    }
 
-		this.fetch = await fetch(this.options.url, fetchOptions).then(function (response) {
+    if (this.formData) {
+      fetchOptions['body'] = this.formData
+    }
 
-			return response.ok ? response.text() : false
+    this.fetch = await fetch(this.options.url, fetchOptions).then(function (response) {
 
-		}).then(function (dom) {
+      return response.ok ? response.text() : false
 
-			// Creating success event.
-			const successEvent = new CustomEvent('vPjax:success', {detail: {dom: dom}});
-			document.dispatchEvent(successEvent);
-			return dom
+    }).then(function (dom) {
 
-		}).catch(function (err) {
+      // Creating success event.
+      const successEvent = new CustomEvent('vPjax:success', {detail: {dom: dom}});
+      document.dispatchEvent(successEvent);
+      return dom
 
-			// Creating error event.
-			const errorEvent = new CustomEvent('vPjax:error', {detail: {error: err}});
-			document.dispatchEvent(errorEvent);
-			throw err
-			return false
+    }).catch(function (err) {
 
-		})
+      // Creating error event.
+      const errorEvent = new CustomEvent('vPjax:error', {detail: {error: err}});
+      document.dispatchEvent(errorEvent);
+      throw err
+      return false
 
-		if (this.fetch) {
+    })
 
-			// Extracting.
-			this.loadContent(this.fetch)
-			if (this.options.timeOut) {
-				clearTimeout(timer);
-			}
-			this.fetch = null
-		} else {
+    if (this.fetch) {
 
-			// Force redirect.
-			// location.href = this.options.url
-		}
-		return this
-	}
+      // Extracting.
+      this.loadContent(this.fetch)
+      if (this.options.timeOut) {
+        clearTimeout(timer);
+      }
+      this.fetch = null
+    } else {
 
-	loadContent (html, back = false) {
+      // Force redirect.
+      // location.href = this.options.url
+    }
+    return this
+  }
 
-		const parser = new DOMParser()
-		let dom = parser.parseFromString(html, 'text/html')
-		let wrap = dom.querySelector(this.options.wrap)
+  loadContent (html, back = false) {
 
-		if (wrap) {
+    const parser = new DOMParser()
+    let dom = parser.parseFromString(html, 'text/html')
+    let wrap = dom.querySelector(this.options.wrap)
 
-			let currentWrap = document.querySelector(this.options.wrap)
+    if (wrap) {
 
-			if (currentWrap) {
+      let currentWrap = document.querySelector(this.options.wrap)
 
-				// Creating beforeExtract event.
-				const beforeExtractEvent = new CustomEvent('vPjax:beforeExtract', {detail: {options: this.options, dom: dom}});
-				document.dispatchEvent(beforeExtractEvent);
+      if (currentWrap) {
 
-				let inner = wrap.innerHTML
-				let title = document.querySelector("title").textContent;
-				currentWrap.innerHTML = inner
-				title = dom.querySelector("title").textContent
+        // Creating beforeExtract event.
+        const beforeExtractEvent = new CustomEvent('vPjax:beforeExtract', {detail: {options: this.options, dom: dom}});
+        document.dispatchEvent(beforeExtractEvent);
 
-				if (title) {
-					document.querySelector("title").textContent = title
-				}
+        let inner = wrap.innerHTML
+        let title = document.querySelector("title").textContent;
+        currentWrap.innerHTML = inner
+        title = dom.querySelector("title").textContent
 
-				let url = new URL(this.options.url);
+        if (title) {
+          document.querySelector("title").textContent = title
+        }
 
-				if (back) 
-					window.history.back(-1);
-				else 
-					window.history.pushState({}, '', url);
+        let url = new URL(this.options.url);
 
-				// Creating finish event.
-				const finishEvent = new CustomEvent('vPjax:finish', {detail: {options: this.options, url: url}});
-				document.dispatchEvent(finishEvent);
+        if (back) 
+          window.history.back(-1);
+        else 
+          window.history.pushState({}, '', url);
 
-				this.init()
+        // Creating finish event.
+        const finishEvent = new CustomEvent('vPjax:finish', {detail: {options: this.options, url: url}});
+        document.dispatchEvent(finishEvent);
 
-			} else {
-				// Force redirect because element does not exist.
-				location.href = this.options.url
-				throw "The element specified as selector does not exist!"
+        this.init()
 
-			}
-		} else {
-			// Force redirect because server response not correct.
-			location.href = this.options.url
-			throw "Server response is not correct! -> " + html
-		}
-		return this
-	}
+      } else {
+        // Force redirect because element does not exist.
+        location.href = this.options.url
+        throw "The element specified as selector does not exist!"
 
-	// Returns the "href" component of the given URL object, with the hash removed.
-	stripHash(location) {
-		return location.href.replace(/#.*/, '')
-	}
+      }
+    } else {
+      // Force redirect because server response not correct.
+      location.href = this.options.url
+      throw "Server response is not correct! -> " + html
+    }
+    return this
+  }
 
-	// Form submit
-	form (selector) {
+  // Returns the "href" component of the given URL object, with the hash removed.
+  stripHash(location) {
+    return location.href.replace(/#.*/, '')
+  }
 
-		this.options.formSelector = selector;
-		return this
-	}
+  // Form submit
+  form (selector) {
 
-	getBack (event) {
+    this.options.formSelector = selector;
+    return this
+  }
 
-		// Creating popstate event.
-		const popStateEvent = new CustomEvent('vPjax:popstate', {detail: {options: this.options, url: document.location}});
-		document.dispatchEvent(popStateEvent);
-		this.get(document.location)
-	}
+  getBack (event) {
+
+    // Creating popstate event.
+    const popStateEvent = new CustomEvent('vPjax:popstate', {detail: {options: this.options, url: document.location}});
+    document.dispatchEvent(popStateEvent);
+    this.get(document.location)
+  }
 }

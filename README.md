@@ -15,7 +15,9 @@ const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').init()
 const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').form('[data-vpjax]').init()
 
 // You can also use it as below to reload the page.
-vanillaPjax.reload();
+vanillaPjax.reload(); // current
+// or
+vanillaPjax.reload("https://site-address.com"); // another
 ```
 For events;
 ```js
