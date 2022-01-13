@@ -10,6 +10,14 @@ According to the `X-VPJAX` header that comes with the request in the server outp
 
 // When instantiating the class we send a flag to the constructor method pointing to the trigger and the container.
 const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').init()
+// Or we can send more flag as an object. As follows...
+const vanillaPjax = new vPjax({
+  selector: 'a:not([target="_blank"])', // element selector to be based on if clicked
+  wrap: '#wrap', // container selector to base on query result
+  formSelector: 'form[data-vpjax]', // form selector to be used as a basis for form submission operations
+  cacheExpire: 500 // cache time in ms
+  timeOut: 2000 // timeout in ms
+}).init()
 
 // And with form submit support.
 const vanillaPjax = new vPjax('a:not([target="_blank"])', '#wrap').form('[data-vpjax]').init()

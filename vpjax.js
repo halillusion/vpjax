@@ -8,17 +8,32 @@
 class vPjax {
 
   // Define basic parameters and initialize class
-  constructor (selector, wrap) {
+  constructor (options, wrap = null) {
 
-    this.version = '0.5.1'
+    this.version = '0.7.0'
+
     this.options = {
-      selector,
-      wrap,
+      selector: null,
+      wrap: null,
       formSelector: null,
       url: null,
       cacheExpire: 300,
       timeOut: 1000,
     }
+
+    if (wrap !== null) {
+      this.options.wrap = wrap
+    }
+
+    if (typeof options !== 'object') {
+      this.options.selector = options
+      if (wrap === null) {
+        console.error("Wrapper is not defined!");
+      } 
+    } else {
+      this.mergeObject(this.options, options)
+    }
+    
     this.fetch = null
     this.method = 'GET'
     this.formData = null
@@ -46,6 +61,28 @@ class vPjax {
     }
 
     return this
+  }
+
+  // Provides synchronization of setting data.
+  mergeObject(defaultObj, overridedObj, key = null) {
+    
+    if (defaultObj !== null && overridedObj !== null) {
+      const keys = Object.keys(overridedObj)
+      let key = null
+
+      for (let i = 0; i < keys.length; i++) {
+        key = keys[i]
+        if (! defaultObj.hasOwnProperty(key) || typeof overridedObj[key] !== 'object') defaultObj[key] = overridedObj[key];
+        else {
+          defaultObj[key] = this.mergeObject(defaultObj[key], overridedObj[key], key);
+        }
+      }
+
+    } else {
+      defaultObj = overridedObj
+    }
+    return defaultObj;
+
   }
 
   // Handle the click event.
