@@ -55,7 +55,12 @@ class vPjax {
     if ( element.getAttribute('href') === '#') 
       return
 
-    const link = new URL(element.getAttribute('href'))
+    let href = this.urlCheck(element.getAttribute('href'));
+
+    if (href === false)
+      return
+
+    const link = new URL(href)
 
     // Middle click, command click, and control click should open links in a new tab as normal.
     if ( event.ctrlKey || event.shiftKey || event.altKey || event.metaKey || event.which > 1 ) 
@@ -83,6 +88,26 @@ class vPjax {
     this.get(link)
     event.preventDefault()
     return this
+  }
+
+  // URL checker
+  urlCheck(url) {
+
+    // url pattern
+    let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+
+    if (!!pattern.test(url)) {
+      return url
+    } else {
+      url = window.location.origin + url
+      return !!pattern.test(url) ? url : false
+    }
+
   }
 
   // Reload to direct link or current page
