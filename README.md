@@ -15,7 +15,7 @@ const vanillaPjax = new vPjax({
   selector: 'a:not([target="_blank"])', // element selector to be based on if clicked
   wrap: '#wrap', // container selector to base on query result
   formSelector: 'form[data-vpjax]', // form selector to be used as a basis for form submission operations
-  cacheExpire: 500 // cache time in ms
+  cacheExpire: 500, // cache time in ms
   timeOut: 2000 // timeout in ms
 }).init()
 
