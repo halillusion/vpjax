@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/halillusion/vpjax#readme",
   "devDependencies": {
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "express-rate-limit": "^6.2.0"
   },
   "scripts": {
     "test": "node test.js"
