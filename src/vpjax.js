@@ -10,7 +10,7 @@ class vPjax {
   // Define basic parameters and initialize class
   constructor (options, wrap = null) {
 
-    this.version = '0.7.0'
+    this.version = '0.8.0'
 
     this.options = {
       selector: null,
