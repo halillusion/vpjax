@@ -38,6 +38,8 @@ class vPjax {
     this.method = 'GET'
     this.formData = null
 
+    window.vPjax = {}
+
     window.onpopstate = (e) => this.getBack(e)
     return this
   }
@@ -94,8 +96,14 @@ class vPjax {
 
     let href = this.urlCheck(element.getAttribute('href'));
 
-    if (href === false)
+    if (href === null) {
+      console.error("File protocol doesn't supported!")
       return
+    }
+
+    if (href === false) {
+      return
+    }
 
     const link = new URL(href)
 
@@ -129,20 +137,15 @@ class vPjax {
 
   // URL checker
   urlCheck(url) {
-
     // url pattern
-    let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-
-    if (!!pattern.test(url)) {
+    const pattern = /(?:^|\s)((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/g
+    if (pattern.exec(url)) {
       return url
+    } else if (window.location.protocol == "file:") {
+      return null
     } else {
       url = window.location.origin + url
-      return !!pattern.test(url) ? url : false
+      return pattern.exec(url) ? url : false
     }
 
   }
@@ -233,14 +236,23 @@ class vPjax {
 
     this.fetch = await fetch(this.options.url, fetchOptions).then(function (response) {
 
+      if (response.headers.get('refresh')) {
+        let refresh = response.headers.get('refresh').replace(' ', '')
+        window.vPjax.refresh = refresh.split(";url=")
+      }
+
+      if (response.headers.get('location')) {
+        window.vPjax.location = response.headers.get('location')
+      }
+
       return response.ok ? response.text() : false
 
-    }).then(function (dom) {
+    }).then(function (response) {
 
       // Creating success event.
-      const successEvent = new CustomEvent('vPjax:success', {detail: {dom: dom}});
+      const successEvent = new CustomEvent('vPjax:success', {detail: {dom: response.dom}});
       document.dispatchEvent(successEvent);
-      return dom
+      return response
 
     }).catch(function (err) {
 
@@ -252,6 +264,21 @@ class vPjax {
 
     })
 
+    if (window.vPjax.location) {
+      let locationUrl = this.urlCheck(window.vPjax.location)
+      this.get(locationUrl)
+      window.vPjax.location = null
+      return this
+    }
+
+    if (window.vPjax.refresh) {
+      let refreshUrl = this.urlCheck(window.vPjax.refresh[1])
+      setTimeout(() => {
+        this.get(refreshUrl)
+      }, (parseInt(window.vPjax.refresh[0]) * 1000))
+      window.vPjax.refresh = null
+    }
+    
     if (this.fetch) {
 
       // Extracting.
@@ -327,7 +354,6 @@ class vPjax {
 
   // Form submit
   form (selector) {
-
     this.options.formSelector = selector;
     return this
   }

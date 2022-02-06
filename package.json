@@ -1,11 +1,8 @@
 {
   "name": "vpjax",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "You can save your visitors from reloading resources every time they switch pages. In addition, since the whole process is asynchronous, it will provide a great experience by providing a faster transition.",
   "main": "vpjax.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/halillusion/vpjax.git"
@@ -24,5 +21,11 @@
   "bugs": {
     "url": "https://github.com/halillusion/vpjax/issues"
   },
-  "homepage": "https://github.com/halillusion/vpjax#readme"
+  "homepage": "https://github.com/halillusion/vpjax#readme",
+  "devDependencies": {
+    "express": "^4.17.2"
+  },
+  "scripts": {
+    "test": "node test.js"
+  }
 }
