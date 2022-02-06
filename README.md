@@ -1,6 +1,13 @@
 # Vanilla JS + pushState = vPjax
 You can save your visitors from reloading resources every time they switch pages. In addition, since the whole process is asynchronous, it will provide a great experience by providing a faster transition.
 
+## Get Started
+### NPM
+`npm install vpjax`
+
+### CDN
+`https://unpkg.com/vpjax`
+
 ## How to Use?
 So, it's very easy. You just need to instantiate a class where you mark the trigger selector and container element selector. 
 You can also perform external actions by adding a listener for events that occur while running.
