@@ -1,6 +1,6 @@
 {
   "name": "vpjax",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "You can save your visitors from reloading resources every time they switch pages. In addition, since the whole process is asynchronous, it will provide a great experience by providing a faster transition.",
   "main": "vpjax.js",
   "repository": {
@@ -23,8 +23,8 @@
   },
   "homepage": "https://github.com/halillusion/vpjax#readme",
   "devDependencies": {
-    "express": "^4.17.2",
-    "express-rate-limit": "^6.2.0"
+    "express": "^4.18.1",
+    "express-rate-limit": "^6.4.0"
   },
   "scripts": {
     "test": "node test.js"

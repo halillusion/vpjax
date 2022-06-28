@@ -1,5 +1,5 @@
 /*!
- * Copyright 2021, Halil Ibrahim Ercelik
+ * Copyright 2022, Halil Ibrahim Ercelik
  * Released under the MIT License
  * {@link https://github.com/halillusion/vpjax GitHub}
  * Inspired by defunkt's jQuery-Pjax
@@ -10,7 +10,7 @@ class vPjax {
   // Define basic parameters and initialize class
   constructor (options, wrap = null) {
 
-    this.version = '0.8.1'
+    this.version = '0.8.2'
 
     this.options = {
       selector: null,
@@ -313,8 +313,11 @@ class vPjax {
 
         let inner = wrap.innerHTML
         let title = document.querySelector("title").textContent;
-        currentWrap.innerHTML = inner
-        title = dom.querySelector("title").textContent
+        currentWrap.innerHTML = inner;
+        currentWrap.className = wrap.className;
+        title = dom.querySelector("title").textContent;
+
+
 
         if (title) {
           document.querySelector("title").textContent = title
